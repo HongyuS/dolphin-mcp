@@ -3,9 +3,30 @@ Command-line interface for Dolphin MCP.
 """
 
 import asyncio
+import json
 import sys
 from .utils import parse_arguments
 from .client import run_interaction
+
+
+async def run(
+    user_query, chosen_model_name, config_path, quiet_mode, log_messages_path
+):
+    """
+    Run the interaction with the given parameters.
+    """
+    result = await run_interaction(
+        user_query=user_query,
+        model_name=chosen_model_name,
+        config_path=config_path,
+        quiet_mode=quiet_mode,
+        log_messages_path=log_messages_path,
+        stream=True,
+    )
+    async for chunk in result:
+        data = {"content": chunk}
+        sys.stdout.write(f"data: {json.dumps(data)}\n\n")
+
 
 def main():
     """
@@ -13,30 +34,50 @@ def main():
     """
     # Check for help flag first
     if "--help" in sys.argv or "-h" in sys.argv:
-        print("Usage: dolphin-mcp-cli [--model <name>] [--quiet] [--config <file>] [--log-messages <file>] 'your question'")
+        print(
+            "Usage: dolphin-mcp-cli [--model <name>] [--quiet] [--config <file>] [--log-messages <file>] 'your question'"
+        )
         print("\nOptions:")
         print("  --model <name>         Specify the model to use")
         print("  --quiet                Suppress intermediate output")
-        print("  --config <file>        Specify a custom config file (default: mcp_config.json)")
+        print(
+            "  --config <file>        Specify a custom config file (default: mcp_config.json)"
+        )
         print("  --log-messages <file>  Log all LLM interactions to a JSONL file")
         print("  --help, -h             Show this help message")
         sys.exit(0)
-        
-    chosen_model_name, user_query, quiet_mode, config_path, log_messages_path = parse_arguments()
+
+    chosen_model_name, user_query, quiet_mode, config_path, log_messages_path = (
+        parse_arguments()
+    )
     if not user_query:
-        print("Usage: dolphin-mcp-cli [--model <name>] [--quiet] [--config <file>] 'your question'")
+        print(
+            "Usage: dolphin-mcp-cli [--model <name>] [--quiet] [--config <file>] 'your question'"
+        )
         sys.exit(1)
 
     # We do not pass a config object; we pass config_path
-    final_text = asyncio.run(run_interaction(
-        user_query=user_query,
-        model_name=chosen_model_name,
-        config_path=config_path,
-        quiet_mode=quiet_mode,
-        log_messages_path=log_messages_path
-    ))
+    # final_text = asyncio.run(
+    #     run_interaction(
+    #         user_query=user_query,
+    #         model_name=chosen_model_name,
+    #         config_path=config_path,
+    #         quiet_mode=quiet_mode,
+    #         log_messages_path=log_messages_path,
+    #     )
+    # )
 
-    print("\n" + final_text.strip() + "\n")
+    # print("\n" + final_text.strip() + "\n")
+    asyncio.run(
+        run(
+            user_query=user_query,
+            chosen_model_name=chosen_model_name,
+            config_path=config_path,
+            quiet_mode=quiet_mode,
+            log_messages_path=log_messages_path,
+        )
+    )
+
 
 if __name__ == "__main__":
     main()
