@@ -8,6 +8,15 @@
         "run",
         "server.py"
       ]
+    },
+    "oe-git-ext": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "~/dev/mcp/oe-git-ext",
+        "run",
+        "server.py"
+      ]
     }
   },
   "models": [
