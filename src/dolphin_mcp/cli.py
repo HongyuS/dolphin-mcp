@@ -25,7 +25,7 @@ async def run(
     )
     async for chunk in result:
         data = {"content": chunk}
-        sys.stdout.write(f"data: {json.dumps(data)}\n\n")
+        sys.stdout.write(f"data: {json.dumps(data, ensure_ascii=False)}\n\n")
 
 
 def main():
@@ -56,18 +56,6 @@ def main():
         )
         sys.exit(1)
 
-    # We do not pass a config object; we pass config_path
-    # final_text = asyncio.run(
-    #     run_interaction(
-    #         user_query=user_query,
-    #         model_name=chosen_model_name,
-    #         config_path=config_path,
-    #         quiet_mode=quiet_mode,
-    #         log_messages_path=log_messages_path,
-    #     )
-    # )
-
-    # print("\n" + final_text.strip() + "\n")
     asyncio.run(
         run(
             user_query=user_query,
