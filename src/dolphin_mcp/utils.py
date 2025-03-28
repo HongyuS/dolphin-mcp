@@ -2,12 +2,10 @@
 Utility functions for Dolphin MCP.
 """
 
-import os
 import sys
 import json
 import logging
 import dotenv
-from typing import Dict, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.CRITICAL)
@@ -17,16 +15,17 @@ logger.setLevel(logging.CRITICAL)
 # Load environment variables
 dotenv.load_dotenv(override=True)
 
+
 async def load_mcp_config_from_file(config_path="mcp_config.json") -> dict:
     """
     Load MCP configuration from a JSON file.
-    
+
     Args:
         config_path: Path to the configuration file
-        
+
     Returns:
         Dict containing the configuration
-        
+
     Raises:
         SystemExit: If the file is not found or contains invalid JSON
     """
@@ -40,24 +39,26 @@ async def load_mcp_config_from_file(config_path="mcp_config.json") -> dict:
         print(f"Error: Invalid JSON in {config_path}.")
         sys.exit(1)
 
+
 def parse_arguments():
     """
     Parse command-line arguments.
-    
+
     Returns:
-        Tuple containing (chosen_model, user_query, quiet_mode, config_path, log_messages_path)
+        Tuple containing (chosen_model, user_query, quiet_mode, config_path, log_messages_path, list_tools)
     """
     args = sys.argv[1:]
     chosen_model = None
     quiet_mode = False
     config_path = "mcp_config.json"  # default
     log_messages_path = None
+    list_tools = False  # 新增参数用于处理--tools选项
     user_query_parts = []
     i = 0
     while i < len(args):
         if args[i] == "--model":
             if i + 1 < len(args):
-                chosen_model = args[i+1]
+                chosen_model = args[i + 1]
                 i += 2
             else:
                 print("Error: --model requires an argument")
@@ -65,16 +66,19 @@ def parse_arguments():
         elif args[i] == "--quiet":
             quiet_mode = True
             i += 1
+        elif args[i] == "--tools" or args[i] == "-t":  # 修改支持--tools和-t选项
+            list_tools = True
+            i += 1
         elif args[i] == "--config":
             if i + 1 < len(args):
-                config_path = args[i+1]
+                config_path = args[i + 1]
                 i += 2
             else:
                 print("Error: --config requires an argument")
                 sys.exit(1)
         elif args[i] == "--log-messages":
             if i + 1 < len(args):
-                log_messages_path = args[i+1]
+                log_messages_path = args[i + 1]
                 i += 2
             else:
                 print("Error: --log-messages requires an argument")
@@ -87,4 +91,4 @@ def parse_arguments():
             i += 1
 
     user_query = " ".join(user_query_parts)
-    return chosen_model, user_query, quiet_mode, config_path, log_messages_path
+    return chosen_model, user_query, quiet_mode, config_path, log_messages_path, list_tools
